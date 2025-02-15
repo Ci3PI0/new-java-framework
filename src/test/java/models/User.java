@@ -5,15 +5,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class User {
-	int id;
-	String username;
-	String firstName;
-	String lastName;
-	String email;
-	String password;
-	String phone;
-	int userStatus;
+	private String username;
+	private String firstName;
+	private String lastName;
+	private String email;
+	private String password;
+	private String phone;
+	private int id;
+	private int userStatus;
 }
