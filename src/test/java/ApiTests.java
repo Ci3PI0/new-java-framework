@@ -4,13 +4,18 @@ import models.AddUserResponse;
 import models.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import static io.restassured.RestAssured.given;
+import java.util.stream.Stream;
+
+import static testdata.TestData.DEFAULT_USER;
+import static testdata.TestData.INVALID_USER;
 
 public class ApiTests {
-	UserController userController = new UserController();
+    UserController userController = new UserController();
 
-	//	@Test
+    //	@Test
 //	void simpleTest() {
 //		/// AAA Pattern Arrange(Подготовка) -> Act (Исполнение) -> Assert (Сравнение)
 //		String body = """
@@ -38,46 +43,71 @@ public class ApiTests {
 //
 //
 //	}
-	User user1 = new User(
-		  "username",
-		  "firstname",
-		  "LastName",
-		  "some@gmail.com",
-		  "qwe123",
-		  "77777777",
-		  11231,
-		  0);
-
-	@Test()
-	void createUserController() {
 
 
-		User userBuilder = User.builder()
-			  .username("BuilderUserName")
-			  .firstName("BuildFirstName")
-			  .lastName("BuildLastName")
-			  .email("build@gmail.com")
-			  .phone("12345689")
-			  .password("qwe123123")
-			  .id(1231231)
-			  .userStatus(0)
-			  .build();
+    @Test()
+    void createDefaultUserController() {
 
-		Response response = userController.createUser(user1);
-		AddUserResponse addUserResponse = response.as(AddUserResponse.class);
-		System.out.println(addUserResponse);
+        Response response = userController.createDefaultUser();
+        AddUserResponse addUserResponse = response.as(AddUserResponse.class);
+        System.out.println(addUserResponse);
 
-		Assertions.assertEquals(200, response.statusCode());
-		Assertions.assertEquals(200, addUserResponse.getCode());
-		Assertions.assertEquals("unknown", addUserResponse.getType());
-		Assertions.assertEquals(user1.getId(), Integer.parseInt(addUserResponse.getMessage()));
+        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(200, addUserResponse.getCode());
+        Assertions.assertEquals("unknown", addUserResponse.getType());
+        Assertions.assertFalse(addUserResponse.getMessage().isEmpty());
 
-	}
+    }
 
-	@Test
-	void deleteUser() {
-		Response response = userController.deleteUserByUsername(user1.getUsername());
-		System.out.println(response.asString());
-		Assertions.assertEquals(200, response.statusCode());
-	}
+    @Test()
+    void createUserController() {
+
+        Response response = userController.createUser(DEFAULT_USER);
+        AddUserResponse addUserResponse = response.as(AddUserResponse.class);
+        System.out.println(addUserResponse);
+
+        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(200, addUserResponse.getCode());
+        Assertions.assertEquals("unknown", addUserResponse.getType());
+        Assertions.assertFalse(addUserResponse.getMessage().isEmpty());
+
+    }
+
+    @Test
+    void createUserController2() {
+        Response response = userController.createUser(INVALID_USER);
+        AddUserResponse addUserResponse = response.as(AddUserResponse.class);
+        System.out.println(addUserResponse);
+
+        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(200, addUserResponse.getCode());
+        Assertions.assertEquals("unknown", addUserResponse.getType());
+        Assertions.assertEquals(INVALID_USER.getId(), Integer.parseInt(addUserResponse.getMessage()));
+    }
+
+    static Stream<User> users() {
+        return Stream.of(DEFAULT_USER, INVALID_USER);
+    }
+
+    @ParameterizedTest()
+    @MethodSource("users")
+    void createUserParametrizedController(User user) {
+
+        Response response = userController.createUser(user);
+        AddUserResponse addUserResponse = response.as(AddUserResponse.class);
+//        System.out.println(addUserResponse);
+
+        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(200, addUserResponse.getCode());
+        Assertions.assertEquals("unknown", addUserResponse.getType());
+        Assertions.assertFalse(addUserResponse.getMessage().isEmpty());
+
+    }
+
+    @Test
+    void deleteUser() {
+        Response response = userController.deleteUserByUsername(DEFAULT_USER.getUsername());
+        System.out.println(response.asString());
+        Assertions.assertEquals(200, response.statusCode());
+    }
 }
